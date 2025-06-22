@@ -1,33 +1,13 @@
-# MLflow Tracking Server usando AWS SageMaker MLflow nativo
-
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
-}
-
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 # S3 Bucket para artefactos (opcional - SageMaker puede crear uno automáticamente)
 resource "aws_s3_bucket" "mlflow_artifacts" {
-  bucket = "s3-mlflow-artifacts-${var.tracking_server_name}-${random_string.bucket_suffix.result}"
+  bucket = "s3-mlflow-artifacts-${var.tracking_server_name}-01"
 
   tags = {
     Name        = "MLflow Artifacts"
     Environment = var.environment
   }
-}
-
-resource "random_string" "bucket_suffix" {
-  length  = 8
-  special = false
-  upper   = false
 }
 
 resource "aws_s3_bucket_versioning" "mlflow_artifacts_versioning" {
