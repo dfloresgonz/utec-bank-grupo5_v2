@@ -122,7 +122,7 @@ resource "aws_sagemaker_mlflow_tracking_server" "mlflow_server" {
   role_arn             = aws_iam_role.mlflow_tracking_server_role.arn
 
   # Configuración del servidor
-  tracking_server_size = var.instance_type
+  tracking_server_size = var.tracking_server_size
 
   # S3 bucket para artefactos
   artifact_store_uri = "s3://${aws_s3_bucket.mlflow_artifacts.bucket}/mlflow-artifacts"

@@ -11,17 +11,14 @@ variable "tracking_server_name" {
   default     = "mlflow-tracking-server-grupo5"
 }
 
-variable "instance_type" {
-  description = "Tipo de instancia para el MLflow server"
+variable "tracking_server_size" {
+  description = "Tamaño del MLflow tracking server"
   type        = string
-  default     = "ml.t3.medium"
+  default     = "Small"
 
   validation {
-    condition = contains([
-      "ml.t3.medium", "ml.t3.large", "ml.t3.xlarge",
-      "ml.m5.large", "ml.m5.xlarge", "ml.m5.2xlarge"
-    ], var.instance_type)
-    error_message = "Instance type must be a valid SageMaker MLflow instance type."
+    condition     = contains(["Small", "Medium", "Large"], var.tracking_server_size)
+    error_message = "tracking_server_size must be one of: Small, Medium, Large."
   }
 }
 
