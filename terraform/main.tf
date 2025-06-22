@@ -131,7 +131,7 @@ resource "aws_sagemaker_mlflow_tracking_server" "mlflow_server" {
   automatic_model_registration = true
 
   # Configuración semanal de mantenimiento (opcional)
-  weekly_maintenance_window_start = "TUE:03:00"
+  weekly_maintenance_window_start = "Tue:03:00"
 
   tags = {
     Name        = var.tracking_server_name
