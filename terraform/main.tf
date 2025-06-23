@@ -74,12 +74,36 @@ resource "aws_iam_policy" "mlflow_s3_access" {
           "s3:PutObject",
           "s3:DeleteObject",
           "s3:ListBucket",
-          "s3:GetBucketLocation"
+          "s3:GetBucketLocation",
+          "sagemaker-mlflow:*",
+          "glue:*",
+          "athena:*",
         ]
         Resource = [
           aws_s3_bucket.mlflow_artifacts.arn,
-          "${aws_s3_bucket.mlflow_artifacts.arn}/*"
+          "${aws_s3_bucket.mlflow_artifacts.arn}/*",
+          "*"
         ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "mlflow_ui_access" {
+  name        = "${var.tracking_server_name}-ui-access"
+  description = "Policy for MLflow UI access"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sagemaker-mlflow:AccessUI",
+          "sagemaker-mlflow:GetTrackingServer", 
+          "sagemaker-mlflow:ListTrackingServers"
+        ]
+        Resource = aws_sagemaker_mlflow_tracking_server.mlflow_server.arn
       }
     ]
   })
@@ -94,6 +118,11 @@ resource "aws_iam_role_policy_attachment" "mlflow_s3_access_attachment" {
 resource "aws_iam_role_policy_attachment" "sagemaker_execution_role_policy" {
   role       = aws_iam_role.mlflow_tracking_server_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "sagemaker_studio_mlflow_access" {
+  role       = aws_iam_role.mlflow_tracking_server_role.name
+  policy_arn = aws_iam_policy.mlflow_ui_access.arn
 }
 
 # MLflow Tracking Server usando el recurso nativo de SageMaker
