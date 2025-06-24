@@ -45,9 +45,3 @@ variable "sagemaker_endpoint_name" {
   type        = string
   default     = "mlflow-sagemaker-endpoint"
 }
-
-variable "mlflow_tracking_uri" {
-  description = "The URI of the MLflow tracking server"
-  type        = string
-  default     = "arn:aws:sagemaker:${var.aws_region}:${data.aws_caller_identity.current.account_id}:mlflow-tracking-server/${var.tracking_server_name}"
-}
