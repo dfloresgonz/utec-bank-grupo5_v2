@@ -154,6 +154,65 @@ resource "aws_sagemaker_mlflow_tracking_server" "mlflow_server" {
   ]
 }
 
+### lambda
+
+resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
+  function_name = var.lambda_function_name
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.8"
+  role          = aws_iam_role.lambda_exec.arn
+  filename      = "src/lambda_function.zip"
+  source_code_hash = filebase64sha256("src/lambda_function.zip")
+
+  environment {
+    variables = {
+      MLFLOW_TRACKING_URI = var.mlflow_tracking_uri
+    }
+  }
+}
+
+resource "aws_api_gateway_rest_api" "api" {
+  name        = var.api_gateway_name
+  description = "API Gateway for MLflow and SageMaker integration"
+}
+
+resource "aws_api_gateway_resource" "lambda_resource" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  path_part   = "invoke"
+}
+
+resource "aws_api_gateway_method" "post" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.lambda_resource.id
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+resource "aws_lambda_permission" "allow_api_gateway" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.mlflow_sagemaker_lambda.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # The source ARN allows the API Gateway to invoke the Lambda function
+  source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
+}
+
+resource "aws_api_gateway_deployment" "api_deployment" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+
+  depends_on = [aws_api_gateway_method.post]
+}
+
+output "api_gateway_invoke_url" {
+  value = "${aws_api_gateway_deployment.api_deployment.invoke_url}/invoke"
+}
+
+output "lambda_function_arn" {
+  value = aws_lambda_function.mlflow_sagemaker_lambda.arn
+}
+
 # Outputs
 output "mlflow_tracking_server_arn" {
   description = "ARN del MLflow tracking server"

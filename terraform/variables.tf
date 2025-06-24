@@ -27,3 +27,27 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
+
+variable "lambda_function_name" {
+  description = "The name of the AWS Lambda function"
+  type        = string
+  default     = "lmb-mlflow-sagemaker-01"
+}
+
+variable "api_gateway_name" {
+  description = "The name of the API Gateway"
+  type        = string
+  default     = "mlflow-sagemaker-api"
+}
+
+variable "sagemaker_endpoint_name" {
+  description = "The name of the SageMaker endpoint"
+  type        = string
+  default     = "mlflow-sagemaker-endpoint"
+}
+
+variable "mlflow_tracking_uri" {
+  description = "The URI of the MLflow tracking server"
+  type        = string
+  default     = "arn:aws:sagemaker:${var.aws_region}:${data.aws_caller_identity.current.account_id}:mlflow-tracking-server/${var.tracking_server_name}"
+}
