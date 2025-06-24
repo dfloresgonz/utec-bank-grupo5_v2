@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - mainx
-      - developx
+      - develop
   workflow_dispatch:
 
 env:
