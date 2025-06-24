@@ -19,7 +19,8 @@ def lambda_handler(event, context):
     os.environ['MLFLOW_TRACKING_SERVER_ARN'] = tracking_server_arn
     mlflow.set_tracking_uri(tracking_uri)
 
-    mlflow.log_param("input_data", input_data)
+    with mlflow.start_run():
+      mlflow.log_param("input_data", input_data)
     # Parse the response from SageMaker
     # result = json.loads(response['Body'].read().decode())
     result = {
