@@ -60,10 +60,6 @@ jobs:
           rm -rf python
         working-directory: ./  # Asegúrate de que 'src' está en la raíz del repo
 
-      - name: Upload Lambda package to S3
-        run: |
-          aws s3 cp src/lambda_function.zip s3://s3-mlflow-artifacts-mlflow-tracking-server-grupo5-01/src/lambda_function.zip
-      
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -87,6 +83,10 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
+      - name: Upload Lambda package to S3
+        run: |
+          aws s3 cp src/lambda_function.zip s3://s3-mlflow-artifacts-mlflow-tracking-server-grupo5-01/src/lambda_function.zip
+      
       - name: Generate backend config
         run: |
           echo "bucket = \"s3-${TF_VAR_env}-${TF_VAR_project}-infra-tfstate\"" > backend.hcl
