@@ -188,7 +188,7 @@ resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
 
   environment {
     variables = {
-      MLFLOW_TRACKING_URI = data.aws_sagemaker_mlflow_tracking_server.mlflow_server.tracking_server_url
+      MLFLOW_TRACKING_URI = aws_sagemaker_mlflow_tracking_server.mlflow_server.tracking_server_url
       # MLFLOW_TRACKING_URI = "arn:aws:sagemaker:${var.aws_region}:${data.aws_caller_identity.current.account_id}:mlflow-tracking-server/${var.tracking_server_name}"
     }
   }
