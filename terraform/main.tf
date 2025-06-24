@@ -77,7 +77,7 @@ resource "aws_iam_policy" "mlflow_s3_access" {
            "s3:ListBucketVersions",
            "s3:GetObjectVersion",
            "s3:DeleteObjectVersion",
-           "sagemaker-mlflow:*",
+           "s3:PutBucketVersioning",
            "glue:*",
            "athena:*",
         ]
@@ -96,6 +96,13 @@ resource "aws_iam_policy" "mlflow_s3_access" {
           "logs:DescribeLogStreams"
         ]
         Resource = "arn:aws:logs:*:*:*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sagemaker:*"
+        ]
+        Resource = "*"
       }
     ]
   })
@@ -129,6 +136,11 @@ resource "aws_iam_role_policy_attachment" "mlflow_s3_access_attachment" {
 resource "aws_iam_role_policy_attachment" "sagemaker_execution_role_policy" {
   role       = aws_iam_role.mlflow_tracking_server_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "sagemaker_mlflow_policy" {
+  role       = aws_iam_role.mlflow_tracking_server_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSageMakerMLflowAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "sagemaker_studio_mlflow_access" {
