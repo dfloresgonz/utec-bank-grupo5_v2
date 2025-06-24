@@ -181,7 +181,9 @@ resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.8"
   role          = aws_iam_role.lambda_exec.arn
-  filename      = "../src/lambda_function.zip"
+  # filename      = "../src/lambda_function.zip"
+  s3_bucket     = aws_s3_bucket.mlflow_artifacts.bucket
+  s3_key        = "src/lambda_function.zip"
   source_code_hash = filebase64sha256("../src/lambda_function.zip")
 
   environment {
@@ -228,6 +230,16 @@ resource "aws_api_gateway_stage" "test" {
   stage_name    = "test"
   rest_api_id   = aws_api_gateway_rest_api.api.id
   deployment_id = aws_api_gateway_deployment.api_deployment.id
+}
+
+resource "aws_api_gateway_integration" "lambda" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.lambda_resource.id
+  http_method = aws_api_gateway_method.post.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.mlflow_sagemaker_lambda.invoke_arn
 }
 
 output "api_gateway_invoke_url" {

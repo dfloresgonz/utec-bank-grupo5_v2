@@ -60,12 +60,9 @@ jobs:
           rm -rf python
         working-directory: ./  # Asegúrate de que 'src' está en la raíz del repo
 
-      - name: List files after build
+      - name: Upload Lambda package to S3
         run: |
-          echo "Root directory after build:"
-          ls -lah
-          echo "Src directory after build:"
-          ls -lah src/
+          aws s3 cp src/lambda_function.zip s3://s3-mlflow-artifacts-mlflow-tracking-server-grupo5-01/src/lambda_function.zip
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
