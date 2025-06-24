@@ -66,8 +66,6 @@ jobs:
           ls -lah
           echo "Src directory after build:"
           ls -lah src/
-          echo "Lambda zip file details:"
-          ls -lah lambda_function.zip
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
