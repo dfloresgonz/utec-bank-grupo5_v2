@@ -2,67 +2,66 @@ import json
 import boto3
 import mlflow
 import os
-from mlflow.tracking import MlflowClient
 
 
 def lambda_handler(event, context):
   try:
-    # Initialize the MLflow tracking URI
     tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
     tracking_server_arn = os.environ.get("MLFLOW_TRACKING_SERVER_ARN")
 
     print(f"Tracking URI: {tracking_uri}")
     print(f"Tracking Server ARN: {tracking_server_arn}")
 
-    # Configurar autenticación AWS
+    # Configurar credentials explícitamente
     session = boto3.Session()
     credentials = session.get_credentials()
 
-    # Configurar variables de entorno para MLflow
+    # Set environment variables for MLflow
     os.environ['MLFLOW_TRACKING_SERVER_ARN'] = tracking_server_arn
     os.environ['AWS_ACCESS_KEY_ID'] = credentials.access_key
     os.environ['AWS_SECRET_ACCESS_KEY'] = credentials.secret_key
     if credentials.token:
       os.environ['AWS_SESSION_TOKEN'] = credentials.token
 
+    # Verificar permisos SageMaker primero
+    try:
+      sagemaker_client = boto3.client('sagemaker')
+      server_info = sagemaker_client.describe_mlflow_tracking_server(
+          TrackingServerName=tracking_server_arn.split('/')[-1]
+      )
+      print(
+          f"MLflow server status: {server_info.get('TrackingServerStatus', 'Unknown')}")
+    except Exception as sm_error:
+      print(f"SageMaker access error: {sm_error}")
+      # Continue anyway, might still work
+
     body = json.loads(event['body'])
     input_data = body.get('input_data')
     print(f"body: {body}")
 
-    # Configurar MLflow
+    # Configure MLflow
     mlflow.set_tracking_uri(tracking_uri)
-    print("after setting tracking URI")
     print(f"MLflow tracking URI set to: {mlflow.get_tracking_uri()}")
 
-    # Crear cliente MLflow con autenticación
-    client = MlflowClient(tracking_uri=tracking_uri)
-    print("MLflow client created")
-
-    # Intentar crear experimento o usar existente
-    experiment_name = "lambda-test"
+    # Create or get experiment
+    experiment_name = "lambda-experiment"
     try:
       experiment_id = mlflow.create_experiment(experiment_name)
       print(f"Created experiment: {experiment_id}")
-    except Exception as exp_error:
-      print(f"Experiment creation error: {exp_error}")
-      try:
-        experiment = mlflow.get_experiment_by_name(experiment_name)
-        experiment_id = experiment.experiment_id if experiment else None
-        print(f"Using existing experiment: {experiment_id}")
-      except:
-        experiment_id = None
-        print("Using default experiment")
+    except:
+      experiment = mlflow.get_experiment_by_name(experiment_name)
+      experiment_id = experiment.experiment_id if experiment else None
+      print(f"Using existing experiment: {experiment_id}")
 
-    # Hacer logging
+    # Log to MLflow
     with mlflow.start_run(experiment_id=experiment_id):
       print("Starting MLflow run")
       mlflow.log_param("input_data", str(input_data))
       mlflow.log_param("lambda_request_id", context.aws_request_id)
-      print("Successfully logged parameters")
+      print("Successfully logged to MLflow")
 
-    print("after logging input data")
     result = {
-        "message": "This is a mock response for input",
+        "message": "Successfully processed and logged to MLflow",
         "input_data": input_data
     }
 
@@ -73,7 +72,6 @@ def lambda_handler(event, context):
 
   except Exception as e:
     print(f"Error occurred: {str(e)}")
-    print(f"Error type: {type(e)}")
     return {
         'statusCode': 500,
         'body': json.dumps({'error': str(e)})
