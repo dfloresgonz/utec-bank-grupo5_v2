@@ -1,6 +1,6 @@
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
-# S3 Bucket para artefactos (opcional - SageMaker puede crear uno automáticamente)
+
 resource "aws_s3_bucket" "mlflow_artifacts" {
   bucket = "s3-mlflow-artifacts-${var.tracking_server_name}-01"
 
@@ -36,7 +36,6 @@ resource "aws_s3_bucket_public_access_block" "mlflow_artifacts_pab" {
   restrict_public_buckets = true
 }
 
-# IAM Role para el MLflow Tracking Server
 resource "aws_iam_role" "mlflow_tracking_server_role" {
   name = "${var.tracking_server_name}-execution-role"
 
@@ -59,7 +58,6 @@ resource "aws_iam_role" "mlflow_tracking_server_role" {
   }
 }
 
-# Política para acceso a S3
 resource "aws_iam_policy" "mlflow_s3_access" {
   name        = "policy-${var.tracking_server_name}-s3-access"
   description = "Policy for MLflow tracking server S3 access"
@@ -109,7 +107,6 @@ resource "aws_iam_policy" "mlflow_ui_access" {
   })
 }
 
-# Adjuntar políticas al rol
 resource "aws_iam_role_policy_attachment" "mlflow_s3_access_attachment" {
   role       = aws_iam_role.mlflow_tracking_server_role.name
   policy_arn = aws_iam_policy.mlflow_s3_access.arn
@@ -125,21 +122,16 @@ resource "aws_iam_role_policy_attachment" "sagemaker_studio_mlflow_access" {
   policy_arn = aws_iam_policy.mlflow_ui_access.arn
 }
 
-# MLflow Tracking Server usando el recurso nativo de SageMaker
 resource "aws_sagemaker_mlflow_tracking_server" "mlflow_server" {
   tracking_server_name = var.tracking_server_name
   role_arn             = aws_iam_role.mlflow_tracking_server_role.arn
 
-  # Configuración del servidor
   tracking_server_size = var.tracking_server_size
 
-  # S3 bucket para artefactos
   artifact_store_uri = "s3://${aws_s3_bucket.mlflow_artifacts.bucket}/mlflow-artifacts"
 
-  # Configuración de acceso automático desde SageMaker Studio
   automatic_model_registration = true
 
-  # Configuración semanal de mantenimiento (opcional)
   weekly_maintenance_window_start = "Tue:03:00"
 
   tags = {
@@ -181,7 +173,6 @@ resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.9"
   role          = aws_iam_role.lambda_exec.arn
-  # filename      = "../src/lambda_function.zip"
   s3_bucket     = aws_s3_bucket.mlflow_artifacts.bucket
   s3_key        = "src/lambda_function.zip"
   source_code_hash = filebase64sha256("../src/lambda_function.zip")
@@ -219,7 +210,6 @@ resource "aws_lambda_permission" "allow_api_gateway" {
   function_name = aws_lambda_function.mlflow_sagemaker_lambda.function_name
   principal     = "apigateway.amazonaws.com"
 
-  # The source ARN allows the API Gateway to invoke the Lambda function
   source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
 }
 

@@ -15,11 +15,11 @@ def lambda_handler(event, context):
     input_data = body.get('input_data')
 
     # Log the input data to MLflow
-    mlflow.log_param("input_data", input_data)
 
     os.environ['MLFLOW_TRACKING_SERVER_ARN'] = tracking_server_arn
     mlflow.set_tracking_uri(tracking_uri)
 
+    mlflow.log_param("input_data", input_data)
     # Parse the response from SageMaker
     # result = json.loads(response['Body'].read().decode())
     result = {

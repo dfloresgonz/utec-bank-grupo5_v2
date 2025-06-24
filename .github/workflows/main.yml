@@ -3,7 +3,7 @@ name: Deployment Workflow
 on:
   push:
     branches:
-      - mainx
+      - main
       - develop
   workflow_dispatch:
 
@@ -58,7 +58,7 @@ jobs:
           zip -r ../lambda_function.zip .
           cd ..
           rm -rf python
-        working-directory: ./  # Asegúrate de que 'src' está en la raíz del repo
+        working-directory: ./
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
