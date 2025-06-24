@@ -43,6 +43,11 @@ jobs:
           exit 1
 
       - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
       
       - name: Build Lambda package
         run: |
@@ -54,6 +59,15 @@ jobs:
           cd ..
           rm -rf python
         working-directory: ./  # Asegúrate de que 'src' está en la raíz del repo
+
+      - name: List files after build
+        run: |
+          echo "Root directory after build:"
+          ls -lah
+          echo "Src directory after build:"
+          ls -lah src/
+          echo "Lambda zip file details:"
+          ls -lah lambda_function.zip
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
