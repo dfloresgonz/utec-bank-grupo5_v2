@@ -7,12 +7,17 @@ import os
 tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
 tracking_server_arn = os.environ.get("MLFLOW_TRACKING_SERVER_ARN")
 
+print(f"Tracking URI: {tracking_uri}")
+print(f"Tracking Server ARN: {tracking_server_arn}")
+
 
 def lambda_handler(event, context):
   # Parse the incoming request
   try:
     body = json.loads(event['body'])
     input_data = body.get('input_data')
+
+    print(f"body: {body}")
 
     # Log the input data to MLflow
 
