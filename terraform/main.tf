@@ -179,7 +179,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
   function_name = var.lambda_function_name
   handler       = "lambda_function.lambda_handler"
-  runtime       = "python3.8"
+  runtime       = "python3.9"
   role          = aws_iam_role.lambda_exec.arn
   # filename      = "../src/lambda_function.zip"
   s3_bucket     = aws_s3_bucket.mlflow_artifacts.bucket
@@ -243,7 +243,7 @@ resource "aws_api_gateway_stage" "test" {
 }
 
 output "api_gateway_invoke_url" {
-  value = "https://${aws_api_gateway_rest_api.api.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${aws_api_gateway_stage.test.stage_name}/invoke"
+  value = "https://${aws_api_gateway_rest_api.api.id}.execute-api.${data.aws_region.current.id}.amazonaws.com/${aws_api_gateway_stage.test.stage_name}/invoke"
 }
 
 output "lambda_function_arn" {
