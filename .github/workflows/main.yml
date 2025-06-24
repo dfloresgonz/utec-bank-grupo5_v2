@@ -44,9 +44,16 @@ jobs:
 
       - uses: actions/checkout@v4
       
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Build Lambda package
+        run: |
+          cd src
+          pip install -r requirements.txt -t python
+          cp lambda_function.py python/
+          cd python
+          zip -r ../lambda_function.zip .
+          cd ..
+          rm -rf python
+        working-directory: ./  # Asegúrate de que 'src' está en la raíz del repo
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
