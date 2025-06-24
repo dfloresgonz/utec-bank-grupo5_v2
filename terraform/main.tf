@@ -138,11 +138,6 @@ resource "aws_iam_role_policy_attachment" "sagemaker_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "sagemaker_mlflow_policy" {
-  role       = aws_iam_role.mlflow_tracking_server_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSageMakerMLflowAccess"
-}
-
 resource "aws_iam_role_policy_attachment" "sagemaker_studio_mlflow_access" {
   role       = aws_iam_role.mlflow_tracking_server_role.name
   policy_arn = aws_iam_policy.mlflow_ui_access.arn
@@ -194,29 +189,6 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
-  function_name = var.lambda_function_name
-  handler       = "lambda_function.lambda_handler"
-  runtime       = "python3.9"
-  role          = aws_iam_role.lambda_exec.arn
-  s3_bucket     = aws_s3_bucket.mlflow_artifacts.bucket
-  s3_key        = "src/lambda_function.zip"
-  source_code_hash = filebase64sha256("../src/lambda_function.zip")
-  timeout          = 15
-
-  environment {
-    variables = {
-      MLFLOW_TRACKING_URI = aws_sagemaker_mlflow_tracking_server.mlflow_server.tracking_server_url
-      MLFLOW_TRACKING_SERVER_ARN = aws_sagemaker_mlflow_tracking_server.mlflow_server.arn
-      GIT_PYTHON_REFRESH = "quiet"
-    }
-  }
-  depends_on = [
-    aws_iam_role_policy_attachment.lambda_basic_execution,
-    aws_iam_role_policy_attachment.lambda_mlflow_policy_attachment
-  ]
-}
-
 # Agregar esta política para MLflow access desde Lambda
 resource "aws_iam_policy" "lambda_mlflow_policy" {
   name        = "policy-${var.lambda_function_name}-mlflow"
@@ -228,9 +200,10 @@ resource "aws_iam_policy" "lambda_mlflow_policy" {
       {
         Effect = "Allow"
         Action = [
-          "sagemaker:DescribeMLflowTrackingServer",
-          "sagemaker:GetMLflowTrackingServerStatus",
-          "sagemaker:ListMLflowTrackingServers"
+          "sagemaker:*"
+          # "sagemaker:DescribeMLflowTrackingServer",
+          # "sagemaker:GetMLflowTrackingServerStatus",
+          # "sagemaker:ListMLflowTrackingServers"
         ]
         Resource = [
           aws_sagemaker_mlflow_tracking_server.mlflow_server.arn,
@@ -267,6 +240,29 @@ resource "aws_iam_policy" "lambda_mlflow_policy" {
 resource "aws_iam_role_policy_attachment" "lambda_mlflow_policy_attachment" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = aws_iam_policy.lambda_mlflow_policy.arn
+}
+
+resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
+  function_name = var.lambda_function_name
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.9"
+  role          = aws_iam_role.lambda_exec.arn
+  s3_bucket     = aws_s3_bucket.mlflow_artifacts.bucket
+  s3_key        = "src/lambda_function.zip"
+  source_code_hash = filebase64sha256("../src/lambda_function.zip")
+  timeout          = 60
+
+  environment {
+    variables = {
+      MLFLOW_TRACKING_URI = aws_sagemaker_mlflow_tracking_server.mlflow_server.tracking_server_url
+      MLFLOW_TRACKING_SERVER_ARN = aws_sagemaker_mlflow_tracking_server.mlflow_server.arn
+      GIT_PYTHON_REFRESH = "quiet"
+    }
+  }
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_basic_execution,
+    aws_iam_role_policy_attachment.lambda_mlflow_policy_attachment
+  ]
 }
 
 resource "aws_api_gateway_rest_api" "api" {
