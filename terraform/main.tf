@@ -221,17 +221,6 @@ resource "aws_lambda_permission" "allow_api_gateway" {
   source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
 }
 
-resource "aws_api_gateway_deployment" "api_deployment" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  depends_on = [aws_api_gateway_method.post]
-}
-
-resource "aws_api_gateway_stage" "test" {
-  stage_name    = "test"
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  deployment_id = aws_api_gateway_deployment.api_deployment.id
-}
-
 resource "aws_api_gateway_integration" "lambda" {
   rest_api_id = aws_api_gateway_rest_api.api.id
   resource_id = aws_api_gateway_resource.lambda_resource.id
@@ -240,6 +229,17 @@ resource "aws_api_gateway_integration" "lambda" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.mlflow_sagemaker_lambda.invoke_arn
+}
+
+resource "aws_api_gateway_deployment" "api_deployment" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  depends_on = [aws_api_gateway_method.post,aws_api_gateway_integration.lambda]
+}
+
+resource "aws_api_gateway_stage" "test" {
+  stage_name    = "test"
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  deployment_id = aws_api_gateway_deployment.api_deployment.id
 }
 
 output "api_gateway_invoke_url" {
