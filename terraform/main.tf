@@ -231,6 +231,15 @@ resource "aws_iam_policy" "lambda_mlflow_policy" {
           aws_s3_bucket.mlflow_artifacts.arn,
           "${aws_s3_bucket.mlflow_artifacts.arn}/*"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams",
+          "logs:GetLogEvents"
+        ]
+        Resource = "arn:aws:logs:*:*:*"
       }
     ]
   })
