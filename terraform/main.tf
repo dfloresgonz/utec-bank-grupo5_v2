@@ -155,6 +155,26 @@ resource "aws_sagemaker_mlflow_tracking_server" "mlflow_server" {
 }
 
 ### lambda
+resource "aws_iam_role" "lambda_exec" {
+  name = "${var.lambda_function_name}-exec-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
 
 resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
   function_name = var.lambda_function_name
@@ -201,12 +221,17 @@ resource "aws_lambda_permission" "allow_api_gateway" {
 
 resource "aws_api_gateway_deployment" "api_deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
-
   depends_on = [aws_api_gateway_method.post]
 }
 
+resource "aws_api_gateway_stage" "test" {
+  stage_name    = "test"
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  deployment_id = aws_api_gateway_deployment.api_deployment.id
+}
+
 output "api_gateway_invoke_url" {
-  value = "${aws_api_gateway_deployment.api_deployment.invoke_url}/invoke"
+  value = "https://${aws_api_gateway_rest_api.api.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${aws_api_gateway_stage.test.stage_name}/invoke"
 }
 
 output "lambda_function_arn" {
