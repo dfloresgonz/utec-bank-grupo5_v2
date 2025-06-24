@@ -46,4 +46,42 @@ def lambda_handler(event, context):
     body = json.loads(event['body'])
     input_data = body.get('input_data')
 
-    # Rest of your code...
+    # Crear experimento si no existe
+    experiment_name = "lambda-inference"
+    try:
+      experiment_id = mlflow.create_experiment(experiment_name)
+      logger.info(f"Created experiment: {experiment_id}")
+    except Exception as e:
+      logger.info(f"Using existing experiment: {e}")
+      experiment = mlflow.get_experiment_by_name(experiment_name)
+      experiment_id = experiment.experiment_id if experiment else None
+
+    # Iniciar run
+    with mlflow.start_run(experiment_id=experiment_id):
+      # Log parameters
+      mlflow.log_param("input_data", str(input_data))
+      mlflow.log_param("lambda_function", context.function_name)
+
+      # Tu lógica de procesamiento
+      result = {
+          "message": "Processed successfully",
+          "input_received": input_data,
+          "timestamp": context.aws_request_id
+      }
+
+      # Log metrics
+      mlflow.log_metric("requests_processed", 1)
+
+      logger.info("MLflow logging completed successfully")
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps({'result': result})
+    }
+
+  except Exception as e:
+    logger.error(f"Error in lambda_handler: {str(e)}")
+    return {
+        'statusCode': 500,
+        'body': json.dumps({'error': str(e)})
+    }
