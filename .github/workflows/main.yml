@@ -90,6 +90,11 @@ jobs:
       #   run: |
       #     aws s3 cp src/lambda_function.zip s3://s3-mlflow-artifacts-mlflow-tracking-server-grupo5-01/src/lambda_function.zip
       
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.LAMBDA_IMAGE_NAME }} || \
+          aws ecr create-repository --repository-name ${{ env.LAMBDA_IMAGE_NAME }}
+
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
