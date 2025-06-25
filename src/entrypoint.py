@@ -22,6 +22,7 @@ def lambda_handler(event, context):
   with mlflow.start_run():
     mlflow.log_param("input", str(input_data))
     mlflow.log_metric("requests", 1)
+    print("done...")
 
   print("MLflow parameters and metrics logged.")
 
