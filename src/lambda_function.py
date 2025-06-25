@@ -4,13 +4,13 @@ import os
 
 os.environ['MLFLOW_TRACKING_USERNAME'] = 'name'
 os.environ['MLFLOW_TRACKING_PASSWORD'] = 'pass'
+tracking_uri = os.environ['MLFLOW_TRACKING_URI']
+print(f"Tracking URI: {tracking_uri}")
+# Configuración básica
+mlflow.set_tracking_uri(tracking_uri)
 
 
 def lambda_handler(event, context):
-  tracking_uri = os.environ['MLFLOW_TRACKING_SERVER_ARN']
-  print(f"Tracking URI: {tracking_uri}")
-  # Configuración básica
-  mlflow.set_tracking_uri(tracking_uri)
 
   # Procesamiento simple
   input_data = json.loads(event['body']).get('input_data', {})
