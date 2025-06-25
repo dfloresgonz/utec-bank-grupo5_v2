@@ -13,7 +13,10 @@ RUN pip install --no-cache-dir --verbose \
     pandas
 
 # Verify installations
-RUN python -c "import mlflow; print(f'MLflow version: {mlflow.__version__}')"
+RUN python -c "import mlflow; print(f'MLflow version: {mlflow.__version__}')" && \
+    python -c "import boto3; print('boto3 imported successfully')" && \
+    python -c "import pandas; print('pandas imported successfully')" && \
+    python -c "import numpy; print('numpy imported successfully')"
 
 # Copy the function code
 COPY app/lambda_function.py ${LAMBDA_TASK_ROOT}
