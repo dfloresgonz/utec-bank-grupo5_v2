@@ -82,7 +82,7 @@ jobs:
 
       - name: Build Docker image for Lambda
         run: |
-          docker build -t ${{ env.ECR_REPOSITORY }} .
+          docker build -t ${{ env.LAMBDA_IMAGE_NAME }} .
         working-directory: src
 
       - name: Tag Docker image
