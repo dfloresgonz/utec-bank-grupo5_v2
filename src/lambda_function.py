@@ -7,7 +7,7 @@ os.environ['MLFLOW_TRACKING_PASSWORD'] = 'pass'
 
 
 def lambda_handler(event, context):
-  tracking_uri = os.environ['MLFLOW_TRACKING_URI']
+  tracking_uri = os.environ['MLFLOW_TRACKING_SERVER_ARN']
   print(f"Tracking URI: {tracking_uri}")
   # Configuración básica
   mlflow.set_tracking_uri(tracking_uri)
