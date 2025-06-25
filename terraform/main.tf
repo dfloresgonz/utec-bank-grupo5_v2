@@ -207,7 +207,7 @@ resource "aws_iam_policy" "lambda_mlflow_policy" {
         ]
         Resource = [
           aws_sagemaker_mlflow_tracking_server.mlflow_server.arn,
-          "arn:aws:sagemaker:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:mlflow-tracking-server/*"
+          "arn:aws:sagemaker:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:mlflow-tracking-server/*"
         ]
       },
       {
@@ -251,14 +251,20 @@ resource "aws_iam_role_policy_attachment" "lambda_mlflow_policy_attachment" {
   policy_arn = aws_iam_policy.lambda_mlflow_policy.arn
 }
 
+resource "aws_ecr_repository" "lambda_repository" {
+  name = "ecr-${var.lambda_function_name}"
+}
+
 resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
   function_name = var.lambda_function_name
-  handler       = "lambda_function.lambda_handler"
-  runtime       = "python3.9"
+  # handler       = "lambda_function.lambda_handler"
+  # runtime       = "python3.9"
   role          = aws_iam_role.lambda_exec.arn
-  s3_bucket     = aws_s3_bucket.mlflow_artifacts.bucket
-  s3_key        = "src/lambda_function.zip"
-  source_code_hash = filebase64sha256("../src/lambda_function.zip")
+  image_uri     = "${aws_ecr_repository.lambda_repository.repository_url}:latest"
+  package_type  = "Image"
+  # s3_bucket     = aws_s3_bucket.mlflow_artifacts.bucket
+  # s3_key        = "src/lambda_function.zip"
+  # source_code_hash = filebase64sha256("../src/lambda_function.zip")
   timeout          = 60
 
   environment {
