@@ -2,6 +2,9 @@ import json
 import mlflow
 import os
 
+os.environ['MLFLOW_TRACKING_USERNAME'] = 'name'
+os.environ['MLFLOW_TRACKING_PASSWORD'] = 'pass'
+
 
 def lambda_handler(event, context):
   tracking_uri = os.environ['MLFLOW_TRACKING_URI']
