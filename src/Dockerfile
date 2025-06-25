@@ -19,7 +19,8 @@ RUN python -c "import mlflow; print(f'MLflow version: {mlflow.__version__}')" &&
     python -c "import numpy; print('numpy imported successfully')"
 
 # Copy the function code
-COPY app/lambda_function.py ${LAMBDA_TASK_ROOT}/
+# COPY app/lambda_function.py ${LAMBDA_TASK_ROOT}/
+COPY pp/lambda_function.py /var/task/lambda_function.py
 
 # Command to run the Lambda function
 CMD ["lambda_function.lambda_handler"]
