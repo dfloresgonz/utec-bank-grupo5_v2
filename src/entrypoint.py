@@ -2,17 +2,16 @@ import json
 import mlflow
 import os
 
-os.environ['MLFLOW_TRACKING_USERNAME'] = 'name'
-os.environ['MLFLOW_TRACKING_PASSWORD'] = 'pass'
-# tracking_uri = os.environ['MLFLOW_TRACKING_URI']
-tracking_uri = os.environ['MLFLOW_TRACKING_SERVER_ARN']
-print(f"Tracking URI: {tracking_uri}")
-# Configuración básica
-mlflow.set_tracking_uri(tracking_uri)
-print(f"MLflow tracking URI set to: {tracking_uri}")
-
 
 def lambda_handler(event, context):
+  os.environ['MLFLOW_TRACKING_USERNAME'] = 'name'
+  os.environ['MLFLOW_TRACKING_PASSWORD'] = 'pass'
+  # tracking_uri = os.environ['MLFLOW_TRACKING_URI']
+  tracking_uri = os.environ['MLFLOW_TRACKING_SERVER_ARN']
+  print(f"Tracking URI: {tracking_uri}")
+  # Configuración básica
+  mlflow.set_tracking_uri(tracking_uri)
+  print(f"MLflow tracking URI set to: {tracking_uri}")
 
   # Procesamiento simple
   input_data = json.loads(event['body']).get('input_data', {})
