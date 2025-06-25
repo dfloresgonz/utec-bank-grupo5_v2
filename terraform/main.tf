@@ -5,6 +5,11 @@ data "aws_ecr_repository" "lambda_repository" {
   name = "ecr-v2-${var.lambda_function_name}"
 }
 
+data "aws_ecr_image" "lambda_image" {
+  repository_name = "ecr-v2-${var.lambda_function_name}"
+  image_tag       = "latest"
+}
+
 resource "aws_s3_bucket" "mlflow_artifacts" {
   bucket = "s3-mlflow-artifacts-${var.tracking_server_name}-01"
 
@@ -261,6 +266,7 @@ resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
   image_uri = "${data.aws_ecr_repository.lambda_repository.repository_url}:latest"
   package_type  = "Image"
   timeout          = 60
+  source_code_hash = data.aws_ecr_image.lambda_image.image_digest
 
   environment {
     variables = {
