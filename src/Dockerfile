@@ -1,6 +1,19 @@
 FROM public.ecr.aws/lambda/python:3.9
 
-RUN pip install --no-cache-dir mlflow==2.13.2 sagemaker-mlflow==0.1.0 xgboost==2.1.4 boto3 numpy pandas 
+# Upgrade pip first
+RUN pip install --upgrade pip
+
+# Install Python dependencies with verbose output for debugging
+RUN pip install --no-cache-dir --verbose \
+    mlflow==2.13.2 \
+    sagemaker-mlflow==0.1.0 \
+    xgboost==2.1.4 \
+    boto3 \
+    numpy \
+    pandas
+
+# Verify installations
+RUN python -c "import mlflow; print(f'MLflow version: {mlflow.__version__}')"
 
 # Copy the function code
 COPY app/lambda_function.py ${LAMBDA_TASK_ROOT}

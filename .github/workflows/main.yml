@@ -88,6 +88,10 @@ jobs:
         run: |
           docker tag ${{ env.LAMBDA_IMAGE_NAME }}:latest ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
 
+      - name: Test Docker image locally
+        run: |
+          docker run --rm ${{ env.LAMBDA_IMAGE_NAME }}:latest python -c "import mlflow; print('MLflow imported successfully')"
+
       - name: Push Docker image to ECR
         run: |
           docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
