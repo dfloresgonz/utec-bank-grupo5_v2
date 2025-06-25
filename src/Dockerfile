@@ -15,10 +15,9 @@ RUN pip install --no-cache-dir --target /var/task \
 # Copy the function code
 # COPY app/lambda_function.py ${LAMBDA_TASK_ROOT}/
 # COPY lambda_function.py /var/task/lambda_function.py
-COPY lambda_function.py /var/task/
+COPY entrypoint.py /var/task/entrypoint.py
 
-RUN cd /var/task && python -c "import mlflow; print(f'✅ MLflow version: {mlflow.__version__}')"
-
+# RUN cd /var/task && python -c "import mlflow; print(f'✅ MLflow version: {mlflow.__version__}')"
 
 # Command to run the Lambda function
-CMD ["lambda_function.lambda_handler"]
+CMD ["entrypoint.lambda_handler"]
