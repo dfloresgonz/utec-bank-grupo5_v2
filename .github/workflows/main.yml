@@ -82,7 +82,8 @@ jobs:
 
       - name: Build Docker image for Lambda
         run: |
-          docker build --network sagemaker -t ${{ env.LAMBDA_IMAGE_NAME }}:latest -f src/Dockerfile src
+          docker build -t ${{ env.ECR_REPOSITORY }} .
+        working-directory: src
 
       - name: Tag Docker image
         run: |
