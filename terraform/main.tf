@@ -1,6 +1,10 @@
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+data "aws_ecr_repository" "lambda_repository" {
+  name = "ecr-${var.lambda_function_name}"
+}
+
 resource "aws_s3_bucket" "mlflow_artifacts" {
   bucket = "s3-mlflow-artifacts-${var.tracking_server_name}-01"
 
@@ -251,16 +255,12 @@ resource "aws_iam_role_policy_attachment" "lambda_mlflow_policy_attachment" {
   policy_arn = aws_iam_policy.lambda_mlflow_policy.arn
 }
 
-resource "aws_ecr_repository" "lambda_repository" {
-  name = "ecr-${var.lambda_function_name}"
-}
-
 resource "aws_lambda_function" "mlflow_sagemaker_lambda" {
   function_name = var.lambda_function_name
   # handler       = "lambda_function.lambda_handler"
   # runtime       = "python3.9"
   role          = aws_iam_role.lambda_exec.arn
-  image_uri     = "${aws_ecr_repository.lambda_repository.repository_url}:latest"
+  image_uri = "${data.aws_ecr_repository.lambda_repository.repository_url}:latest"
   package_type  = "Image"
   # s3_bucket     = aws_s3_bucket.mlflow_artifacts.bucket
   # s3_key        = "src/lambda_function.zip"
