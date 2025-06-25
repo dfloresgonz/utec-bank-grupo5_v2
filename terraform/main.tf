@@ -2,7 +2,7 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 data "aws_ecr_repository" "lambda_repository" {
-  name = "ecr-${var.lambda_function_name}"
+  name = "ecr-v2-${var.lambda_function_name}"
 }
 
 resource "aws_s3_bucket" "mlflow_artifacts" {

@@ -10,7 +10,7 @@ on:
 env:
   AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
   LAMBDA_IMAGE_NAME: "image-lmb-mlflow-sagemaker-01"
-  ECR_REPOSITORY: "ecr-lmb-mlflow-sagemaker-01"
+  ECR_REPOSITORY: "ecr-v2-lmb-mlflow-sagemaker-01"
 
 jobs:
   deploy:
