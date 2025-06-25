@@ -82,12 +82,12 @@ jobs:
 
       - name: Build Docker image for Lambda
         run: |
-          docker build -t ${{ env.LAMBDA_IMAGE_NAME }}:latest -f src/Dockerfile src
+          docker build --network sagemaker -t ${{ env.LAMBDA_IMAGE_NAME }}:latest -f src/Dockerfile src
 
       - name: Tag Docker image
         run: |
           docker tag ${{ env.LAMBDA_IMAGE_NAME }}:latest ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
-          
+
       - name: Push Docker image to ECR
         run: |
           docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
