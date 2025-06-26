@@ -52,6 +52,14 @@ def lambda_handler(event, context):
 
     # Ejecutar predicción
     pred = model.predict_proba(data)[:, 1][0]
+    pred = float(pred)
+
+    all_probs = model.predict_proba(data)[0]
+    prob_no_churn = float(all_probs[0])
+    prob_churn = float(all_probs[1])
+
+    # Predicción binaria
+    binary_pred = int(model.predict(data)[0])
 
     # Tracking con MLflow
     # with mlflow.start_run():
@@ -59,11 +67,17 @@ def lambda_handler(event, context):
     #   mlflow.log_metric("requests", 1)
     #   print("done...")
 
-    print("MLflow parameters and metrics logged.")
+    print(f"MLflow parameters and metrics logged. {pred}")
 
     return {
         'statusCode': 200,
-        'body': json.dumps({'message': 'Éxito', 'pred': pred})
+        'body': json.dumps({
+            'message': 'Éxito',
+            'churn_probability': pred,
+            'no_churn_probability': prob_no_churn,
+            'binary_prediction': binary_pred,
+            'prediction_label': 'CHURN' if binary_pred == 1 else 'NO_CHURN'
+        })
     }
   except Exception as e:
     print(f"Error in lambda_handler: {e}")
