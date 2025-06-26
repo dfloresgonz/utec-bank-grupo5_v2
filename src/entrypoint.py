@@ -30,24 +30,24 @@ def lambda_handler(event, context):
 
     data = pd.DataFrame({
         # Variables numéricas originales
-        'flg_bancarizado': [1],
-        'edad': [35.0],
-        'antiguedad': [5.0],
-        'sdo_activo_menos0': [15000],
-        'sdo_activo_menos1': [12000],
-        'sdo_activo_menos2': [10000],
-        'flg_seguro_menos0': [1],
-        'flg_seguro_menos1': [1],
-        'flg_seguro_menos2': [0],
-        'flg_nomina': [1],
-        'nro_acces_canal1_menos0': [5],
-        'nro_acces_canal2_menos0': [10],
-        'nro_acces_canal3_menos0': [2],
+        'flg_bancarizado': [input_data.get('flg_bancarizado', 1)],
+        'edad': [input_data.get('edad', 35.0)],
+        'antiguedad': [input_data.get('antiguedad', 5.0)],
+        'sdo_activo_menos0': [input_data.get('sdo_activo_menos0', 0)],
+        'sdo_activo_menos1': [input_data.get('sdo_activo_menos1', 0)],
+        'sdo_activo_menos2': [input_data.get('sdo_activo_menos2', 0)],
+        'flg_seguro_menos0': [input_data.get('flg_seguro_menos0', 0)],
+        'flg_seguro_menos1': [input_data.get('flg_seguro_menos1', 0)],
+        'flg_seguro_menos2': [input_data.get('flg_seguro_menos2', 0)],
+        'flg_nomina': [input_data.get('flg_nomina', 0)],
+        'nro_acces_canal1_menos0': [input_data.get('nro_acces_canal1_menos0', 0)],
+        'nro_acces_canal2_menos0': [input_data.get('nro_acces_canal2_menos0', 0)],
+        'nro_acces_canal3_menos0': [input_data.get('nro_acces_canal3_menos0', 0)],
 
         # Variables categóricas ya codificadas (valores numéricos)
-        'flag_lima_provincia_encoded': [0],  # 0=Provincia, 1=Lima
-        'rang_ingreso_encoded': [2],         # Valor numérico del encoder
-        'rang_sdo_pasivo_menos0_encoded': [1]  # Valor numérico del encoder
+        'flag_lima_provincia_encoded': [input_data.get('flag_lima_provincia_encoded', 0)],
+        'rang_ingreso_encoded': [input_data.get('rang_ingreso_encoded', 0)],
+        'rang_sdo_pasivo_menos0_encoded': [input_data.get('rang_sdo_pasivo_menos0_encoded', 0)]
     })
 
     # Ejecutar predicción
