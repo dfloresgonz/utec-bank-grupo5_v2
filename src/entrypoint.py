@@ -1,6 +1,8 @@
 import json
 import mlflow
 import os
+import pandas as pd
+import numpy as np
 
 user = "grupo5"
 model_name = f"model-attrition-{user}"
