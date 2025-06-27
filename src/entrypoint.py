@@ -18,18 +18,15 @@ def lambda_handler(event, context):
     tracking_uri = os.environ['MLFLOW_TRACKING_SERVER_ARN']
     print(f"Tracking URI: {tracking_uri}")
 
-    # Configuración básica
     mlflow.set_tracking_uri(tracking_uri)
     print(f"MLflow tracking URI set to: {tracking_uri}")
 
     model = mlflow.xgboost.load_model(model_uri)
 
-    # Procesamiento simple
     input_data = json.loads(event['body']).get('input_data', {})
     print(f"Received input data: {input_data}")
 
     data = pd.DataFrame({
-        # Variables numéricas originales
         'flg_bancarizado': [input_data.get('flg_bancarizado', 1)],
         'edad': [input_data.get('edad', 35.0)],
         'antiguedad': [input_data.get('antiguedad', 5.0)],
@@ -44,13 +41,11 @@ def lambda_handler(event, context):
         'nro_acces_canal2_menos0': [input_data.get('nro_acces_canal2_menos0', 0)],
         'nro_acces_canal3_menos0': [input_data.get('nro_acces_canal3_menos0', 0)],
 
-        # Variables categóricas ya codificadas (valores numéricos)
         'flag_lima_provincia_encoded': [input_data.get('flag_lima_provincia_encoded', 0)],
         'rang_ingreso_encoded': [input_data.get('rang_ingreso_encoded', 0)],
         'rang_sdo_pasivo_menos0_encoded': [input_data.get('rang_sdo_pasivo_menos0_encoded', 0)]
     })
 
-    # Ejecutar predicción
     pred = model.predict_proba(data)[:, 1][0]
     pred = float(pred)
 
@@ -58,16 +53,9 @@ def lambda_handler(event, context):
     prob_no_churn = float(all_probs[0])
     prob_churn = float(all_probs[1])
 
-    # Predicción binaria
     binary_pred = int(model.predict(data)[0])
 
-    # Tracking con MLflow
-    # with mlflow.start_run():
-    #   mlflow.log_param("input", str(input_data))
-    #   mlflow.log_metric("requests", 1)
-    #   print("done...")
-
-    print(f"MLflow parameters and metrics logged. {pred}")
+    print(f"pred: {pred}")
 
     return {
         'statusCode': 200,
